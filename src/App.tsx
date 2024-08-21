@@ -1,8 +1,8 @@
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import Button from '@mui/material/Button';
 import './App.css';
-import { useEffect } from 'react';
 
 function App() {
   const { handleSubmit, control, setValue, watch } = useForm<FormState>();
