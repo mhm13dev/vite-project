@@ -1,73 +1,103 @@
-import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import Button from '@mui/material/Button';
 import './App.css';
+import { useEffect } from 'react';
 
 function App() {
-  const [selected, setSelected] = useState(defaultOption);
+  const { handleSubmit, control, setValue, watch } = useForm<FormState>();
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * options.length);
+    setValue('plan', options[randomIndex]);
+  }, [setValue]);
+
+  const selected = watch('plan', defaultOption);
+
+  const onSubmit = (data: FormState) => {
+    console.log(data);
+  };
 
   return (
     <Box width={400}>
-      <Autocomplete
-        fullWidth
-        options={options}
-        getOptionLabel={(option) => option.label}
-        value={selected}
-        onChange={(_, newValue) => {
-          setSelected(newValue ?? defaultOption);
-        }}
-        renderInput={(params) => (
-          <TextField {...params} label="Days of the week" fullWidth />
-        )}
-      />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          name="plan"
+          control={control}
+          render={({ field: { onChange } }) => {
+            return (
+              <Autocomplete
+                fullWidth
+                options={options}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => {
+                  return option.value === value.value;
+                }}
+                value={selected}
+                onChange={(_, newValue) => {
+                  onChange(newValue);
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Plan" fullWidth />
+                )}
+              />
+            );
+          }}
+        />
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setSelected(
-            options.find((option) => option.label === 'Friday') ??
-              defaultOption,
-          );
-        }}
-      >
-        Choose Friday
-      </Button>
+        <Box marginTop={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setValue('plan', {
+                label: 'Performance',
+                value: 'chexpass-performance',
+              });
+            }}
+          >
+            Choose Performance
+          </Button>
+        </Box>
+
+        <Box marginTop={2}>
+          <Button type="submit" variant="contained" color="primary">
+            Submit
+          </Button>
+        </Box>
+      </form>
     </Box>
   );
 }
 
 export default App;
 
-const options = [
+interface PlanOption {
+  label: string;
+  value: string | null;
+}
+
+interface FormState {
+  plan: PlanOption;
+}
+
+const options: PlanOption[] = [
   {
-    label: 'Monday',
-    value: 1,
+    label: 'None',
+    value: null,
   },
   {
-    label: 'Tuesday',
-    value: 2,
+    label: 'Starter',
+    value: 'chexpass-starter',
   },
   {
-    label: 'Wednesday',
-    value: 3,
+    label: 'Performance',
+    value: 'chexpass-performance',
   },
   {
-    label: 'Thursday',
-    value: 4,
-  },
-  {
-    label: 'Friday',
-    value: 5,
-  },
-  {
-    label: 'Saturday',
-    value: 6,
-  },
-  {
-    label: 'Sunday',
-    value: 7,
+    label: 'Elite',
+    value: 'chexpass-elite',
   },
 ];
 
-const defaultOption = options.find((option) => option.value === 1)!;
+const defaultOption = options.find((option) => option.label === 'None')!;
